@@ -1,10 +1,12 @@
 # keygrip
 
+[![Build Status](https://img.shields.io/travis/vicanso/keygrip.svg?label=linux+build)](https://travis-ci.org/vicanso/keygrip)
+
 Keygrip is a module for signing and verifying data (such as cookies or URLs) through a rotating credential system, in which new server keys can be added and old ones removed regularly, without invalidating client credentials. It derives from [crypto-utils/keygrip](https://github.com/crypto-utils/keygrip).
 
 ## API
 
-### kg := keygrip.New(keyList []string)
+#### kg := keygrip.New(keyList []string)
 
 ```go
 kg := keygrip.New([]string{
@@ -13,7 +15,9 @@ kg := keygrip.New([]string{
 })
 ```
 
-### Sign(data string)
+#### Sign(data string)
+
+Get the base64 digest(RawURLEncoding) on the first key in the keylist.
 
 ```go
 kg := keygrip.New([]string{
@@ -25,7 +29,10 @@ str := kg.Sign("tree.xie")
 fmt.Println(str)
 ```
 
-### Verify(data, digest string)
+#### Verify(data, digest string)
+
+This loops through all of the keys currently in the keylist until the digest of the current key matches the given digest. Otherwise it will return false.
+
 
 ```go
 kg := keygrip.New([]string{
@@ -35,7 +42,20 @@ kg := keygrip.New([]string{
 fmt.Println(kg.Verify("tree.xie", "VOauNTAF3i24kD9EN5foGvhXNnI"))
 ```
 
-### AddKey(key string)
+#### Index(data, digest string)
+
+This loops through all of the keys currently in the keylist until the digest of the current key matches the given digest, at which point the current index is returned. If no key is matched, -1 is returned.
+
+
+```go
+kg := keygrip.New([]string{
+    "key1",
+    "key2",
+})
+fmt.Println(kg.Index("tree.xie", "VOauNTAF3i24kD9EN5foGvhXNnI"))
+```
+
+#### AddKey(key string)
 
 Add key to the front of key list
 
@@ -47,7 +67,9 @@ kg := keygrip.New([]string{
 kg.Add("key3")
 ```
 
-### RemoveKey(key string)
+#### RemoveKey(key string)
+
+Remove key from key list
 
 ```go
 kg := keygrip.New([]string{
@@ -55,6 +77,30 @@ kg := keygrip.New([]string{
     "key2",
 })
 kg.Remove("key1")
+```
+
+#### Keys()
+
+Get the key list
+
+```go
+kg := keygrip.New([]string{
+    "key1",
+    "key2",
+})
+kg.Keys()
+```
+
+#### RemoveAllKeys()
+
+Remove all keys
+
+```go
+kg := keygrip.New([]string{
+    "key1",
+    "key2",
+})
+kg.RemoveAllKeys()
 ```
 
 ## test
