@@ -22,26 +22,26 @@ type (
 	}
 )
 
-func sign(data, key []byte) string {
+func sign(data, key []byte) []byte {
 	h := hmac.New(sha1.New, key)
 	h.Write(data)
-	s := h.Sum(nil)
-	return base64.RawURLEncoding.EncodeToString(s)
+	return h.Sum(nil)
 }
 
 // Sign get the sign of data
 func (kg *Keygrip) Sign(data string) string {
 	kg.RLock()
 	defer kg.RUnlock()
-	return sign([]byte(data), kg.keys[0])
+	return base64.RawURLEncoding.EncodeToString(sign([]byte(data), kg.keys[0]))
 }
 
 // Index get the valid index of key
 func (kg *Keygrip) Index(data, digest string) int {
 	result := -1
 	d := []byte(data)
+	dig, _ := base64.RawURLEncoding.DecodeString(digest)
 	for index, key := range kg.keys {
-		if result == -1 && sign(d, key) == digest {
+		if result == -1 && bytes.Equal(sign(d, key), dig) {
 			result = index
 		}
 	}
