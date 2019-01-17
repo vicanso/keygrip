@@ -29,19 +29,22 @@ func sign(data, key []byte) []byte {
 }
 
 // Sign get the sign of data
-func (kg *Keygrip) Sign(data string) string {
+func (kg *Keygrip) Sign(data []byte) []byte {
 	kg.RLock()
 	defer kg.RUnlock()
-	return base64.RawURLEncoding.EncodeToString(sign([]byte(data), kg.keys[0]))
+	src := sign(data, kg.keys[0])
+	dst := make([]byte, base64.RawURLEncoding.EncodedLen(len(src)))
+	base64.RawURLEncoding.Encode(dst, src)
+	return dst
 }
 
 // Index get the valid index of key
-func (kg *Keygrip) Index(data, digest string) int {
+func (kg *Keygrip) Index(data, digest []byte) int {
 	result := -1
-	d := []byte(data)
-	dig, _ := base64.RawURLEncoding.DecodeString(digest)
+	dig := make([]byte, base64.RawURLEncoding.DecodedLen(len(digest)))
+	base64.RawURLEncoding.Decode(dig, digest)
 	for index, key := range kg.keys {
-		if result == -1 && bytes.Equal(sign(d, key), dig) {
+		if result == -1 && bytes.Equal(sign(data, key), dig) {
 			result = index
 		}
 	}
@@ -49,7 +52,7 @@ func (kg *Keygrip) Index(data, digest string) int {
 }
 
 // Verify verify the data is valid
-func (kg *Keygrip) Verify(data, digest string) bool {
+func (kg *Keygrip) Verify(data, digest []byte) bool {
 	kg.RLock()
 	defer kg.RUnlock()
 	return kg.Index(data, digest) > -1

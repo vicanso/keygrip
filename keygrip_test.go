@@ -10,7 +10,7 @@ func TestKeygrip(t *testing.T) {
 		kg := New([]string{
 			"a",
 		})
-		data := "tree.xie"
+		data := []byte("tree.xie")
 		hash := kg.Sign(data)
 		if !kg.Verify(data, hash) {
 			t.Fatalf("verify fail")
@@ -21,7 +21,7 @@ func TestKeygrip(t *testing.T) {
 		kg := New([]string{
 			"a",
 		})
-		data := "tree.xie"
+		data := []byte("tree.xie")
 		hash := kg.Sign(data)
 		kg.AddKey("b")
 		if kg.Index(data, hash) != 1 {
@@ -46,7 +46,7 @@ func TestKeygrip(t *testing.T) {
 		kg := New([]string{
 			a,
 		})
-		data := "tree.xie"
+		data := []byte("tree.xie")
 		hash := kg.Sign(data)
 		kg.AddKey(b)
 		if len(kg.Keys()) != 2 || kg.Keys()[0] != b {
@@ -76,22 +76,34 @@ func TestKeygrip(t *testing.T) {
 	})
 }
 
+func BenchmarkSha1(b *testing.B) {
+	b.ReportAllocs()
+	data := []byte("1533082453554-SEyVMmjzVtqtEiVlDoqrneXauXKhPD3w")
+	key := []byte("tree.xie")
+	for i := 0; i < b.N; i++ {
+		sign(data, key)
+	}
+}
+
 func BenchmarkSign(b *testing.B) {
+	b.ReportAllocs()
 	kg := New([]string{
 		"tree.xie",
 		"vicanso",
 	})
+	data := []byte("1533082453554-SEyVMmjzVtqtEiVlDoqrneXauXKhPD3w")
 	for i := 0; i < b.N; i++ {
-		kg.Sign("1533082453554-SEyVMmjzVtqtEiVlDoqrneXauXKhPD3w")
+		kg.Sign(data)
 	}
 }
 
 func BenchmarkVerify(b *testing.B) {
+	b.ReportAllocs()
 	kg := New([]string{
 		"tree.xie",
 		"vicanso",
 	})
-	data := "1533082453554-SEyVMmjzVtqtEiVlDoqrneXauXKhPD3w"
+	data := []byte("1533082453554-SEyVMmjzVtqtEiVlDoqrneXauXKhPD3w")
 	hash := kg.Sign(data)
 	for i := 0; i < b.N; i++ {
 		kg.Verify(data, hash)

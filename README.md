@@ -15,7 +15,7 @@ kg := keygrip.New([]string{
 })
 ```
 
-#### Sign(data string)
+#### Sign(data []byte)
 
 Get the base64 digest(RawURLEncoding) on the first key in the keylist.
 
@@ -24,12 +24,12 @@ kg := keygrip.New([]string{
     "key1",
     "key2",
 })
-str := kg.Sign("tree.xie")
+str := kg.Sign([]byte("tree.xie"))
 // VOauNTAF3i24kD9EN5foGvhXNnI
-fmt.Println(str)
+fmt.Println(string(str))
 ```
 
-#### Verify(data, digest string)
+#### Verify(data, digest []byte)
 
 This loops through all of the keys currently in the keylist until the digest of the current key matches the given digest. Otherwise it will return false.
 
@@ -39,10 +39,10 @@ kg := keygrip.New([]string{
     "key1",
     "key2",
 })
-fmt.Println(kg.Verify("tree.xie", "VOauNTAF3i24kD9EN5foGvhXNnI"))
+fmt.Println(kg.Verify([]byte("tree.xie"), []byte( "VOauNTAF3i24kD9EN5foGvhXNnI")))
 ```
 
-#### Index(data, digest string)
+#### Index(data, digest []byte)
 
 This loops through all of the keys currently in the keylist until the digest of the current key matches the given digest, at which point the current index is returned. If no key is matched, -1 is returned.
 
@@ -52,7 +52,7 @@ kg := keygrip.New([]string{
     "key1",
     "key2",
 })
-fmt.Println(kg.Index("tree.xie", "VOauNTAF3i24kD9EN5foGvhXNnI"))
+fmt.Println(kg.Index([]byte("tree.xie"), []byte("VOauNTAF3i24kD9EN5foGvhXNnI")))
 ```
 
 #### AddKey(key string)
@@ -105,8 +105,8 @@ kg.RemoveAllKeys()
 
 ## test
 
-go test -race -coverprofile=test.out ./... && go tool cover --html=test.out
+make test-cover
 
 ### bench
 
-go test -v -bench=".*" ./
+make bench
