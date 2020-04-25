@@ -24,7 +24,7 @@ type (
 
 func sign(data, key []byte) []byte {
 	h := hmac.New(sha1.New, key)
-	h.Write(data)
+	_, _ = h.Write(data)
 	return h.Sum(nil)
 }
 
@@ -42,7 +42,10 @@ func (kg *Keygrip) Sign(data []byte) []byte {
 func (kg *Keygrip) Index(data, digest []byte) int {
 	result := -1
 	dig := make([]byte, base64.RawURLEncoding.DecodedLen(len(digest)))
-	base64.RawURLEncoding.Decode(dig, digest)
+	_, err := base64.RawURLEncoding.Decode(dig, digest)
+	if err != nil {
+		return -1
+	}
 	for index, key := range kg.keys {
 		if result == -1 && bytes.Equal(sign(data, key), dig) {
 			result = index

@@ -4,7 +4,11 @@ sudo: required
 go:
   - "1.10"
   - "1.11"
+  - "1.12"
+  - "1.13"
+  - "1.14"
   - master
 
 script:
-  - go test -race -cover -v ./...
+  - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin latest
+  -  make lint && make test

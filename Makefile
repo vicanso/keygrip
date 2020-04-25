@@ -1,5 +1,8 @@
 .PHONY: test test-cover
 
+lint:
+	golangci-lint run
+
 # for test
 test:
 	go test -race -cover ./...
