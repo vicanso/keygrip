@@ -43,8 +43,9 @@ func (kg *Keygrip) Index(data, digest []byte) int {
 	result := -1
 	dig := make([]byte, base64.RawURLEncoding.DecodedLen(len(digest)))
 	_, err := base64.RawURLEncoding.Decode(dig, digest)
+	// 如果出错则返回-2
 	if err != nil {
-		return -1
+		return -2
 	}
 	for index, key := range kg.keys {
 		if result == -1 && bytes.Equal(sign(data, key), dig) {
