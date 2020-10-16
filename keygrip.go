@@ -6,7 +6,6 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 	"errors"
-	"sync"
 )
 
 const (
@@ -18,7 +17,6 @@ type (
 	// Keygrip keygrip struct
 	Keygrip struct {
 		keys [][]byte
-		sync.RWMutex
 	}
 )
 
@@ -30,8 +28,6 @@ func sign(data, key []byte) []byte {
 
 // Sign get the sign of data
 func (kg *Keygrip) Sign(data []byte) []byte {
-	kg.RLock()
-	defer kg.RUnlock()
 	src := sign(data, kg.keys[0])
 	dst := make([]byte, base64.RawURLEncoding.EncodedLen(len(src)))
 	base64.RawURLEncoding.Encode(dst, src)
@@ -57,8 +53,6 @@ func (kg *Keygrip) Index(data, digest []byte) int {
 
 // Verify verify the data is valid
 func (kg *Keygrip) Verify(data, digest []byte) bool {
-	kg.RLock()
-	defer kg.RUnlock()
 	return kg.Index(data, digest) > -1
 }
 
@@ -67,8 +61,6 @@ func (kg *Keygrip) handleKey(key, t string) {
 	if key == "" {
 		return
 	}
-	kg.Lock()
-	defer kg.Unlock()
 	newKey := []byte(key)
 	keys := kg.keys
 	index := -1
@@ -106,15 +98,11 @@ func (kg *Keygrip) RemoveKey(key string) {
 
 // RemoveAllKeys remove all keys
 func (kg *Keygrip) RemoveAllKeys() {
-	kg.Lock()
-	defer kg.Unlock()
 	kg.keys = kg.keys[0:0]
 }
 
 // Keys get the key of keygrip
 func (kg *Keygrip) Keys() []string {
-	kg.RLock()
-	defer kg.RUnlock()
 	result := make([]string, len(kg.keys))
 	for i, v := range kg.keys {
 		result[i] = string(v)

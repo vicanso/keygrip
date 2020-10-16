@@ -3,18 +3,19 @@ package keygrip
 import (
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestKeygrip(t *testing.T) {
+	assert := assert.New(t)
 	t.Run("verify", func(t *testing.T) {
 		kg := New([]string{
 			"a",
 		})
 		data := []byte("tree.xie")
 		hash := kg.Sign(data)
-		if !kg.Verify(data, hash) {
-			t.Fatalf("verify fail")
-		}
+		assert.True(kg.Verify(data, hash))
 	})
 
 	t.Run("index", func(t *testing.T) {
@@ -24,9 +25,7 @@ func TestKeygrip(t *testing.T) {
 		data := []byte("tree.xie")
 		hash := kg.Sign(data)
 		kg.AddKey("b")
-		if kg.Index(data, hash) != 1 {
-			t.Fatalf("get index fail")
-		}
+		assert.Equal(1, kg.Index(data, hash))
 	})
 
 	t.Run("keys", func(t *testing.T) {
@@ -35,9 +34,8 @@ func TestKeygrip(t *testing.T) {
 			"b",
 		})
 		keys := kg.Keys()
-		if len(keys) != 2 || strings.Join(keys, ",") != "a,b" {
-			t.Fatalf("get keys fail")
-		}
+		assert.Equal(2, len(keys))
+		assert.Equal("a,b", strings.Join(keys, ","))
 	})
 
 	t.Run("add/remove key", func(t *testing.T) {
@@ -49,19 +47,15 @@ func TestKeygrip(t *testing.T) {
 		data := []byte("tree.xie")
 		hash := kg.Sign(data)
 		kg.AddKey(b)
-		if len(kg.Keys()) != 2 || kg.Keys()[0] != b {
-			t.Fatalf("add key fail")
-		}
-		if !kg.Verify(data, hash) {
-			t.Fatalf("verify fail after add new key")
-		}
+		assert.Equal(2, len(kg.keys))
+		assert.Equal(b, kg.Keys()[0])
+		assert.True(kg.Verify(data, hash))
 		kg.RemoveKey(a)
-		if len(kg.Keys()) != 1 || kg.Keys()[0] != b {
-			t.Fatalf("remove key fail")
-		}
-		if kg.Verify(data, hash) {
-			t.Fatalf("verify should be fail after remove key")
-		}
+
+		assert.Equal(1, len(kg.keys))
+		assert.Equal(b, kg.Keys()[0])
+
+		assert.False(kg.Verify(data, hash))
 	})
 
 	t.Run("remove all keys", func(t *testing.T) {
@@ -70,9 +64,7 @@ func TestKeygrip(t *testing.T) {
 			"b",
 		})
 		kg.RemoveAllKeys()
-		if len(kg.Keys()) != 0 {
-			t.Fatalf("remove all keys fail")
-		}
+		assert.Equal(0, len(kg.Keys()))
 	})
 }
 
