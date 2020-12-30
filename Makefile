@@ -1,4 +1,4 @@
-.PHONY: test test-cover
+.PHONY: test test-cover hooks
 
 lint:
 	golangci-lint run
@@ -12,3 +12,6 @@ test-cover:
 
 bench:
 	go test -bench=. ./...
+
+hooks:
+	cp hooks/* .git/hooks/

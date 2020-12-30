@@ -1,6 +1,6 @@
 # keygrip
 
-[![Build Status](https://img.shields.io/travis/vicanso/keygrip.svg?label=linux+build)](https://travis-ci.org/vicanso/keygrip)
+[![Build Status](https://github.com/vicanso/keygrip/workflows/Test/badge.svg)](https://github.com/vicanso/keygrip/actions)
 
 Keygrip is a module for signing and verifying data (such as cookies or URLs) through a rotating credential system, in which new server keys can be added and old ones removed regularly, without invalidating client credentials. It derives from [crypto-utils/keygrip](https://github.com/crypto-utils/keygrip).
 
