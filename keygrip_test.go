@@ -97,6 +97,13 @@ func TestKeygripRWMutex(t *testing.T) {
 			kg.RemoveKey(strconv.Itoa(i))
 		}
 	}()
+	go func() {
+		for i := 0; i < 100; i++ {
+			kg.SetKeys([]string{
+				"a",
+			})
+		}
+	}()
 
 	time.Sleep(100 * time.Millisecond)
 	assert.NotEmpty(kg.Keys())

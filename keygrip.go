@@ -134,6 +134,23 @@ func (kg *Keygrip) RemoveAllKeys() {
 	kg.keys = kg.keys[0:0]
 }
 
+func (kg *Keygrip) setKeys(keys []string) {
+	arr := make([][]byte, 0)
+	for _, k := range keys {
+		arr = append(arr, []byte(k))
+	}
+	kg.keys = arr
+}
+
+// SetKeys sets the keys of keygrip
+func (kg *Keygrip) SetKeys(keys []string) {
+	if kg.mutex != nil {
+		kg.mutex.Lock()
+		defer kg.mutex.Unlock()
+	}
+	kg.setKeys(keys)
+}
+
 func (kg *Keygrip) getKeys() [][]byte {
 	result := make([][]byte, len(kg.keys))
 	for i, v := range kg.keys {
@@ -161,13 +178,9 @@ func New(keys []string) *Keygrip {
 	if len(keys) == 0 {
 		panic(errors.New("keys can not be empty"))
 	}
-	arr := make([][]byte, 0)
-	for _, k := range keys {
-		arr = append(arr, []byte(k))
-	}
-	return &Keygrip{
-		keys: arr,
-	}
+	kg := &Keygrip{}
+	kg.setKeys(keys)
+	return kg
 }
 
 // NewRWMutex returns a new keygrip with rw mutex
