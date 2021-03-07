@@ -1,8 +1,10 @@
 package keygrip
 
 import (
+	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -66,6 +68,38 @@ func TestKeygrip(t *testing.T) {
 		kg.RemoveAllKeys()
 		assert.Equal(0, len(kg.Keys()))
 	})
+}
+
+func TestKeygripRWMutex(t *testing.T) {
+	assert := assert.New(t)
+
+	kg := NewRWMutex([]string{
+		"a",
+		"b",
+	})
+	data := []byte("tree.xie")
+	hash := kg.Sign(data)
+	assert.True(kg.Verify(data, hash))
+	assert.Equal(0, kg.Index(data, hash))
+
+	go func() {
+		for i := 0; i < 100; i++ {
+			_ = kg.Verify([]byte("data"), []byte("digest"))
+		}
+	}()
+	go func() {
+		for i := 0; i < 100; i++ {
+			kg.AddKey(strconv.Itoa(i))
+		}
+	}()
+	go func() {
+		for i := 0; i < 100; i++ {
+			kg.RemoveKey(strconv.Itoa(i))
+		}
+	}()
+
+	time.Sleep(100 * time.Millisecond)
+	assert.NotEmpty(kg.Keys())
 }
 
 func BenchmarkSha1(b *testing.B) {
