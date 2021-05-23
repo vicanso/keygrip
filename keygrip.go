@@ -34,8 +34,13 @@ func (kg *Keygrip) Sign(data []byte) []byte {
 		kg.mutex.RLock()
 		defer kg.mutex.RUnlock()
 	}
-	keys := kg.getKeys()
-	src := sign(data, keys[0])
+	var key []byte
+	if len(kg.keys) != 0 {
+		key = kg.keys[0]
+	} else {
+		key = []byte("")
+	}
+	src := sign(data, key)
 	dst := make([]byte, base64.RawURLEncoding.EncodedLen(len(src)))
 	base64.RawURLEncoding.Encode(dst, src)
 	return dst
@@ -49,7 +54,7 @@ func (kg *Keygrip) index(data, digest []byte) int {
 	if err != nil {
 		return -2
 	}
-	for index, key := range kg.getKeys() {
+	for index, key := range kg.keys {
 		if result == -1 && bytes.Equal(sign(data, key), dig) {
 			result = index
 		}
@@ -151,13 +156,13 @@ func (kg *Keygrip) SetKeys(keys []string) {
 	kg.setKeys(keys)
 }
 
-func (kg *Keygrip) getKeys() [][]byte {
-	result := make([][]byte, len(kg.keys))
-	for i, v := range kg.keys {
-		result[i] = v
-	}
-	return result
-}
+// func (kg *Keygrip) getKeys() [][]byte {
+// 	result := make([][]byte, len(kg.keys))
+// 	for i, v := range kg.keys {
+// 		result[i] = v
+// 	}
+// 	return result
+// }
 
 // Keys returns the key list of keygrip
 func (kg *Keygrip) Keys() []string {
@@ -165,7 +170,7 @@ func (kg *Keygrip) Keys() []string {
 		kg.mutex.RLock()
 		defer kg.mutex.RUnlock()
 	}
-	keys := kg.getKeys()
+	keys := kg.keys
 	result := make([]string, len(keys))
 	for i, v := range keys {
 		result[i] = string(v)
