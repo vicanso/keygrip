@@ -156,14 +156,6 @@ func (kg *Keygrip) SetKeys(keys []string) {
 	kg.setKeys(keys)
 }
 
-// func (kg *Keygrip) getKeys() [][]byte {
-// 	result := make([][]byte, len(kg.keys))
-// 	for i, v := range kg.keys {
-// 		result[i] = v
-// 	}
-// 	return result
-// }
-
 // Keys returns the key list of keygrip
 func (kg *Keygrip) Keys() []string {
 	if kg.mutex != nil {
