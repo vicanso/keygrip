@@ -60,14 +60,6 @@ func TestKeygrip(t *testing.T) {
 		assert.False(kg.Verify(data, hash))
 	})
 
-	t.Run("remove all keys", func(t *testing.T) {
-		kg := New([]string{
-			"a",
-			"b",
-		})
-		kg.RemoveAllKeys()
-		assert.Equal(0, len(kg.Keys()))
-	})
 }
 
 func TestKeygripRWMutex(t *testing.T) {

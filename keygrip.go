@@ -9,11 +9,6 @@ import (
 	"sync"
 )
 
-const (
-	addKey    = "add"
-	removeKey = "remove"
-)
-
 type (
 	// Keygrip keygrip struct
 	Keygrip struct {
@@ -37,8 +32,6 @@ func (kg *Keygrip) Sign(data []byte) []byte {
 	var key []byte
 	if len(kg.keys) != 0 {
 		key = kg.keys[0]
-	} else {
-		key = []byte("")
 	}
 	src := sign(data, key)
 	dst := make([]byte, base64.RawURLEncoding.EncodedLen(len(src)))
@@ -55,8 +48,9 @@ func (kg *Keygrip) index(data, digest []byte) int {
 		return -2
 	}
 	for index, key := range kg.keys {
-		if result == -1 && bytes.Equal(sign(data, key), dig) {
+		if bytes.Equal(sign(data, key), dig) {
 			result = index
+			break
 		}
 	}
 	return result
@@ -82,34 +76,13 @@ func (kg *Keygrip) Verify(data, digest []byte) bool {
 	return kg.index(data, digest) > -1
 }
 
-// handleKey do something for keys
-func (kg *Keygrip) handleKey(key, t string) {
-	if key == "" {
-		return
-	}
-	newKey := []byte(key)
-	keys := kg.keys
-	index := -1
-	for i, k := range keys {
-		if bytes.Equal(newKey, k) {
-			index = i
+func contains(arr [][]byte, value []byte) bool {
+	for _, v := range arr {
+		if bytes.Equal(v, value) {
+			return true
 		}
 	}
-	if t == addKey {
-		// the key exists
-		if index != -1 {
-			return
-		}
-		kg.keys = append([][]byte{
-			newKey,
-		}, keys...)
-	} else {
-		// the key not exists
-		if index == -1 {
-			return
-		}
-		kg.keys = append(keys[0:index], keys[index+1:]...)
-	}
+	return false
 }
 
 // AddKey adds the key to keygrip
@@ -118,7 +91,15 @@ func (kg *Keygrip) AddKey(key string) {
 		kg.mutex.Lock()
 		defer kg.mutex.Unlock()
 	}
-	kg.handleKey(key, addKey)
+	k := []byte(key)
+	// 如果已存在
+	if contains(kg.keys, k) {
+		return
+	}
+	// 新增加的key放在数组最前，优先使用
+	kg.keys = append([][]byte{
+		k,
+	}, kg.keys...)
 }
 
 // RemoveKey removes the key from keygrip
@@ -127,16 +108,15 @@ func (kg *Keygrip) RemoveKey(key string) {
 		kg.mutex.Lock()
 		defer kg.mutex.Unlock()
 	}
-	kg.handleKey(key, removeKey)
-}
-
-// RemoveAllKeys removes all keys
-func (kg *Keygrip) RemoveAllKeys() {
-	if kg.mutex != nil {
-		kg.mutex.Lock()
-		defer kg.mutex.Unlock()
+	k := []byte(key)
+	keys := make([][]byte, 0, len(kg.keys))
+	for _, key := range kg.keys {
+		if bytes.Equal(k, key) {
+			continue
+		}
+		keys = append(keys, key)
 	}
-	kg.keys = kg.keys[0:0]
+	kg.keys = keys
 }
 
 func (kg *Keygrip) setKeys(keys []string) {

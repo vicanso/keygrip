@@ -91,17 +91,6 @@ kg := keygrip.New([]string{
 kg.Keys()
 ```
 
-#### RemoveAllKeys()
-
-Remove all keys
-
-```go
-kg := keygrip.New([]string{
-    "key1",
-    "key2",
-})
-kg.RemoveAllKeys()
-```
 
 ## test
 
